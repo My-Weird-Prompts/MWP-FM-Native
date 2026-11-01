@@ -4,7 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 EXPECTED_CERT="73bf2cd357da664b0e307c7aaae6629ca4973bbbee6f5a55b71800c3511827c6"
-export JAVA_HOME="${JAVA_HOME:-$(python3 -c 'import json,os;print(json.load(open(os.path.expanduser("~/.bubblewrap/config.json")))["jdkPath"])')}"
+# Same JDK 17 bubblewrap uses (a stale JAVA_HOME in the shell profile is ignored).
+export JAVA_HOME="$(python3 -c 'import json,os;print(json.load(open(os.path.expanduser("~/.bubblewrap/config.json")))["jdkPath"])')"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Development/Android/Sdk}"
 [ -f local.properties ] || echo "sdk.dir=$ANDROID_HOME" > local.properties
 ./gradlew --no-daemon -q assembleRelease

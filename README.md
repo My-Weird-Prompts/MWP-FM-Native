@@ -15,7 +15,7 @@ as the MWP FM web app and sits alongside the wrapped web app; it does not replac
 
 Both can be installed at once (different packages).
 
-## What it does (v1.0.0, 2026-11-01)
+## What it does (v1.0, 2026-11-01)
 
 - **Feed:** `https://stream.myweirdprompts.com/api/radio.json` (the PWA's feed, served by
   `website/src/pages/api/radio.json.ts`), cached on disk with its ETag (`FeedRepository`).
@@ -78,7 +78,7 @@ Restore the key, never regenerate it: a new key breaks in-place upgrades for eve
 
 1. Bump `versionCode` (+1) and `versionName` in `app/build.gradle.kts`.
 2. `scripts/build.sh`.
-3. GitHub release `v<version>` with `dist/mwp-fm-player-<version>.apk` attached.
+3. GitHub release `v<version>` (tier small: v1.0, v1.1, …; see CLAUDE.md) with `dist/mwp-fm-player-<version>.apk` attached.
 4. The F-Droid repo ([My-Weird-Prompts/fdroid](https://github.com/My-Weird-Prompts/fdroid))
    picks up the newest release hourly (`gh workflow run publish.yml -R My-Weird-Prompts/fdroid`
    to publish at once).
