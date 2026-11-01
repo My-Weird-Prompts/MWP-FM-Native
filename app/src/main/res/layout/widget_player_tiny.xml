@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="horizontal" android:gravity="center"
+    android:background="@drawable/widget_bg" android:padding="4dp">
+        <ImageButton android:id="@+id/widget_toggle" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:background="@drawable/widget_btn_bg" android:scaleType="centerInside" android:src="@drawable/widget_ic_play" android:contentDescription="@string/widget_play" />
+        <ImageButton android:id="@+id/widget_next" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:background="@drawable/widget_btn_bg" android:scaleType="centerInside" android:src="@drawable/widget_ic_next" android:contentDescription="@string/widget_next" />
+</LinearLayout>
