@@ -26,6 +26,11 @@
         android:requestLegacyExternalStorage="true"
         android:theme="@style/Theme.MwpFm">
 
+        <!-- Android Auto: this app is a media app; Auto browses PlaybackService. -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -42,6 +47,7 @@
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
+                <action android:name="androidx.media3.session.MediaLibraryService" />
                 <action android:name="androidx.media3.session.MediaSessionService" />
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>

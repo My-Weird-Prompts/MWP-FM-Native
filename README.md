@@ -1,5 +1,10 @@
 # MWP FM Player — native Android
 
+> **Source of truth: `android/` in the My Weird Prompts monorepo** (`danielrosehill/My-Weird-Prompts`,
+> private) since 2026-11-01. The public repo `My-Weird-Prompts/MWP-FM-Native` is a mirror, a
+> `git subtree` split of that folder pushed by `scripts/release.sh`, and it hosts the GitHub
+> releases the F-Droid repo reads. Don't commit to the mirror directly.
+
 The native Android player for [My Weird Prompts](https://myweirdprompts.com): Kotlin,
 Jetpack Compose and Media3 (ExoPlayer + MediaSessionService). It reads the same catalogue
 as the MWP FM web app and sits alongside the wrapped web app; it does not replace it.
@@ -7,7 +12,7 @@ as the MWP FM web app and sits alongside the wrapped web app; it does not replac
 | | Native (this repo) | Wrapped web app |
 | --- | --- | --- |
 | Package | `com.myweirdprompts.fm.player` | `com.myweirdprompts.fm` |
-| Repo | My-Weird-Prompts/MWP-FM-Native | [My-Weird-Prompts/MWP-FM-Android](https://github.com/My-Weird-Prompts/MWP-FM-Android) (Bubblewrap TWA) |
+| Repo | `android/` in the monorepo (mirror: My-Weird-Prompts/MWP-FM-Native) | [My-Weird-Prompts/MWP-FM-Android](https://github.com/My-Weird-Prompts/MWP-FM-Android) (Bubblewrap TWA) |
 | UI code | here | `radio/` in My-Weird-Prompts, loaded live from `stream.myweirdprompts.com` |
 | Playback | own foreground `mediaPlayback` service | runs in Chrome |
 | Downloads | any folder (all-files access) | browser storage |
@@ -15,7 +20,7 @@ as the MWP FM web app and sits alongside the wrapped web app; it does not replac
 
 Both can be installed at once (different packages).
 
-## What it does (v1.0, 2026-11-01)
+## What it does (v1.1, 2026-11-01)
 
 - **Feed:** `https://stream.myweirdprompts.com/api/radio.json` (the PWA's feed, served by
   `website/src/pages/api/radio.json.ts`), cached on disk with its ETag (`FeedRepository`).
@@ -38,6 +43,16 @@ Both can be installed at once (different packages).
   five buttons → play/pause + next. The service pushes state; buttons go to
   `WidgetActionReceiver`, which connects a `MediaController` and runs the command. Play
   with nothing loaded resumes the last queue saved in `Prefs`.
+
+- **Android Auto** (v1.1): `PlaybackService` is a `MediaLibraryService`; the browse tree
+  (`playback/Library.kt`) is Continue listening / Latest / Downloads / Channels → channel,
+  100 items per folder, plus voice search ("play … on MWP FM Player"). Picking an episode in
+  the car queues the episodes after it. Declared by `res/xml/automotive_app_desc.xml`.
+  **Sideloaded apps only appear in Auto with "Unknown sources" on** (Android Auto settings →
+  tap Version ten times → ⋮ → Developer settings). Verified by `LibraryBrowseTest`
+  (`./gradlew connectedAndroidTest`, needs a device/emulator with network); not yet tried
+  in a car or the Desktop Head Unit. Browse-list artwork is http URLs, which Auto may not
+  show (now-playing art works: Media3 loads it as a bitmap).
 
 ## Gotchas found while building (verified on an API 34 emulator, 2026-11-01)
 
@@ -76,11 +91,16 @@ Restore the key, never regenerate it: a new key breaks in-place upgrades for eve
 
 ## Release
 
-1. Bump `versionCode` (+1) and `versionName` in `app/build.gradle.kts`.
-2. `scripts/build.sh`.
-3. GitHub release `v<version>` (tier small: v1.0, v1.1, …; see CLAUDE.md) with `dist/mwp-fm-player-<version>.apk` attached.
-4. The F-Droid repo ([My-Weird-Prompts/fdroid](https://github.com/My-Weird-Prompts/fdroid))
-   picks up the newest release hourly (`gh workflow run publish.yml -R My-Weird-Prompts/fdroid`
-   to publish at once).
-5. Upload the APK to R2 `mwppublic` as `mwp-fm-player.apk` (latest) and
-   `mwp-fm-player-<version>.apk` (served at `cdn.myweirdprompts.com`).
+1. Bump `versionCode` (+1) and `versionName` (`1.N`, small tier, see CLAUDE.md) in
+   `app/build.gradle.kts`, add a line to the table below, commit.
+2. `scripts/release.sh "<release notes>"`: builds and checks the signer, pushes `android/` to
+   the mirror, creates GitHub release `v<version>` there with the APK, uploads
+   `mwp-fm-player.apk` + `mwp-fm-player-<version>.apk` to R2 `mwppublic` and checks the
+   public bytes, then triggers the F-Droid publish. `myweirdprompts.com/apk` redirects to
+   the unversioned key, so it is always the latest.
+3. Check the F-Droid run: `gh run list -R My-Weird-Prompts/fdroid -L 1`.
+
+| Version | Code | Date | Notes |
+| --- | --- | --- | --- |
+| 1.0 | 1 | 2026-11-01 | First release: background playback, chosen download folder, widget, scrubber |
+| 1.1 | 2 | 2026-11-01 | Android Auto (browse tree + voice search) |

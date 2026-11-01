@@ -358,6 +358,14 @@ fun SettingsScreen(app: App) {
             Modifier.padding(horizontal = 16.dp), fontSize = 14.sp,
         )
 
+        Section("Android Auto")
+        Text(
+            "MWP FM Player shows up in Android Auto with Continue listening, Latest, Downloads and Channels. " +
+                "Because it isn't installed from the Play Store, turn on Unknown sources first: Android Auto settings → " +
+                "tap Version ten times → ⋮ → Developer settings → Unknown sources.",
+            Modifier.padding(horizontal = 16.dp), fontSize = 14.sp,
+        )
+
         Section("About")
         Text("MWP FM Player ${BuildConfig.VERSION_NAME} — native build", Modifier.padding(horizontal = 16.dp))
         Text(
