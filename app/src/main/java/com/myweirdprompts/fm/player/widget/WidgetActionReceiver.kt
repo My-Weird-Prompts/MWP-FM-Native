@@ -21,10 +21,12 @@ import com.myweirdprompts.fm.player.playback.PlaybackService
 class WidgetActionReceiver : BroadcastReceiver() {
     companion object {
         const val TOGGLE = "toggle"
-        const val PREV = "prev"
-        const val NEXT = "next"
         const val BACK = "back"
         const val FWD = "fwd"
+        const val DOWNLOAD = "download"
+
+        /** The widget skips a fixed 15 s both ways, whatever the in-app skip settings are. */
+        private const val SKIP_MS = 15_000L
 
         fun intent(ctx: Context, action: String): PendingIntent = PendingIntent.getBroadcast(
             ctx, action.hashCode(),
@@ -38,6 +40,14 @@ class WidgetActionReceiver : BroadcastReceiver() {
         // A receiver's own context may not bind to services; the application context can.
         val ctx = receiverCtx.applicationContext
         val app = ctx.applicationContext as App
+        if (action == DOWNLOAD) {
+            // No session needed: queue the current episode (a no-op if it is already on disk).
+            val cur = PlayerWidget.current(ctx)
+            if (cur != null && cur.audioUrl.isNotEmpty() && app.prefs.nowPlayingTitle() != null) {
+                app.downloads.enqueue(cur.slug, cur.audioUrl, app.prefs.nowPlayingTitle()!!)
+            }
+            return
+        }
         val pending = goAsync()
         val token = SessionToken(ctx, ComponentName(ctx, PlaybackService::class.java))
         val future = MediaController.Builder(ctx, token).buildAsync()
@@ -45,7 +55,7 @@ class WidgetActionReceiver : BroadcastReceiver() {
             val c = runCatching { future.get() }.getOrNull()
             try {
                 if (c != null) {
-                    if (c.mediaItemCount == 0 && action in setOf(TOGGLE, NEXT, PREV)) {
+                    if (c.mediaItemCount == 0 && action == TOGGLE) {
                         val last = app.prefs.lastQueue()
                         if (last != null) {
                             val (q, i) = last
@@ -55,10 +65,12 @@ class WidgetActionReceiver : BroadcastReceiver() {
                         }
                     } else when (action) {
                         TOGGLE -> if (c.isPlaying || c.playWhenReady) c.pause() else { c.prepare(); c.play() }
-                        PREV -> c.seekToPreviousMediaItem()
-                        NEXT -> c.seekToNextMediaItem()
-                        BACK -> c.seekBack()
-                        FWD -> c.seekForward()
+                        BACK -> c.seekTo((c.currentPosition - SKIP_MS).coerceAtLeast(0))
+                        FWD -> {
+                            val d = c.duration
+                            val t = c.currentPosition + SKIP_MS
+                            c.seekTo(if (d != androidx.media3.common.C.TIME_UNSET && d > 0) t.coerceAtMost(d - 1000) else t)
+                        }
                     }
                 }
             } finally {

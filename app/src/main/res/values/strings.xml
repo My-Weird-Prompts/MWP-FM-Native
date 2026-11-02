@@ -2,13 +2,15 @@
 <resources>
     <string name="app_name">MWP FM Player</string>
     <string name="widget_label">MWP FM player</string>
-    <string name="widget_description">Play, pause and skip from the home screen</string>
+    <string name="widget_description">Play, pause, skip 15 seconds and download from the home screen</string>
     <string name="widget_play">Play</string>
     <string name="widget_pause">Pause</string>
-    <string name="widget_prev">Previous episode</string>
-    <string name="widget_next">Next episode</string>
-    <string name="widget_back">Skip back</string>
-    <string name="widget_fwd">Skip forward</string>
+    <string name="widget_back">Back 15 seconds</string>
+    <string name="widget_fwd">Forward 15 seconds</string>
+    <string name="widget_download">Download episode</string>
+    <string name="widget_downloading">Downloading</string>
+    <string name="widget_downloaded">Downloaded</string>
+    <string name="widget_show">My Weird Prompts</string>
     <string name="widget_idle_title">MWP FM</string>
     <string name="widget_idle_sub">Press play to resume</string>
     <color name="widget_bg">#EB0B1220</color>

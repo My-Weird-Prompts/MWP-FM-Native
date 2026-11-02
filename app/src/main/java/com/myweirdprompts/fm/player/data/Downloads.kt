@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.myweirdprompts.fm.player.widget.PlayerWidget
 import java.io.File
 
 /**
@@ -55,25 +56,30 @@ class Downloads(private val ctx: Context, private val prefs: Prefs) {
         return null
     }
 
-    fun enqueue(ep: Episode) {
-        if (_onDisk.value.containsKey(ep.slug)) return
-        _progress.update { it + (ep.slug to -1) }
+    fun enqueue(ep: Episode) = enqueue(ep.slug, ep.audioUrl, ep.title)
+
+    fun enqueue(slug: String, audioUrl: String, title: String) {
+        if (_onDisk.value.containsKey(slug)) return
+        _progress.update { it + (slug to -1) }
+        PlayerWidget.redrawAll(ctx)
         val req = OneTimeWorkRequestBuilder<DownloadWorker>()
-            .setInputData(workDataOf("slug" to ep.slug, "url" to ep.audioUrl, "title" to ep.title))
+            .setInputData(workDataOf("slug" to slug, "url" to audioUrl, "title" to title))
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .addTag("download")
             .build()
-        WorkManager.getInstance(ctx).enqueueUniqueWork("dl-" + ep.slug, ExistingWorkPolicy.KEEP, req)
+        WorkManager.getInstance(ctx).enqueueUniqueWork("dl-" + slug, ExistingWorkPolicy.KEEP, req)
     }
 
     fun cancel(slug: String) {
         WorkManager.getInstance(ctx).cancelUniqueWork("dl-$slug")
         _progress.update { it - slug }
+        PlayerWidget.redrawAll(ctx)
     }
 
     fun delete(slug: String) = scope.launch {
         fileFor(slug)?.delete()
-        rescan()
+        rescan().join()
+        PlayerWidget.redrawAll(ctx)
     }
 
     // ---- called from DownloadWorker (same process) ----
@@ -81,5 +87,6 @@ class Downloads(private val ctx: Context, private val prefs: Prefs) {
     internal fun finished(slug: String, file: File?) {
         _progress.update { it - slug }
         if (file != null) _onDisk.update { it + (slug to file) }
+        PlayerWidget.redrawAll(ctx)
     }
 }

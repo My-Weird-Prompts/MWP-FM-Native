@@ -207,6 +207,10 @@ class PlaybackService : MediaLibraryService() {
                     title = item?.mediaMetadata?.title?.toString(),
                     artUrl = item?.mediaMetadata?.artworkUri?.toString(),
                     playing = exo.isPlaying || (exo.playWhenReady && exo.playbackState == Player.STATE_BUFFERING),
+                    slug = item?.mediaId,
+                    audioUrl = item?.let { MediaItems.entry(it).audioUrl },
+                    positionMs = exo.currentPosition,
+                    durationMs = exo.duration.takeIf { it != C.TIME_UNSET } ?: 0L,
                 )
             }
             if (events.contains(Player.EVENT_IS_PLAYING_CHANGED)) {
@@ -230,7 +234,15 @@ class PlaybackService : MediaLibraryService() {
     private fun startSaver() {
         saver?.cancel()
         saver = scope.launch {
-            while (isActive) { delay(10_000); savePosition() }
+            while (isActive) {
+                delay(10_000)
+                savePosition()
+                // Move the widget's progress bar along.
+                PlayerWidget.update(
+                    this@PlaybackService, playing = true, positionMs = exo.currentPosition,
+                    durationMs = exo.duration.takeIf { it != C.TIME_UNSET } ?: 0L,
+                )
+            }
         }
     }
 
