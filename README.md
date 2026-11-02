@@ -104,3 +104,4 @@ Restore the key, never regenerate it: a new key breaks in-place upgrades for eve
 | --- | --- | --- | --- |
 | 1.0 | 1 | 2026-11-01 | First release: background playback, chosen download folder, widget, scrubber |
 | 1.1 | 2 | 2026-11-01 | Android Auto (browse tree + voice search) |
+| 1.2 | 3 | 2026-11-02 | Widget redesign: art boxed left, show + duration, progress bar; back 15 / play-pause / forward 15 / download |
